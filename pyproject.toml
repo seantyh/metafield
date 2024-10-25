@@ -1,0 +1,13 @@
+[project]
+name = "metafield"
+version = "0.1.0"
+description = "Computational linguistic research companion"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "gitpython>=3.1.43",
+    "litellm>=1.49.1",
+    "nbformat>=5.10.4",
+    "networkx>=3.4.2",
+    "pydot>=3.0.2",
+]
