@@ -1,6 +1,6 @@
 [project]
 name = "metafield"
-version = "0.1.0"
+version = "0.2.0"
 description = "Computational linguistic research companion"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -11,3 +11,6 @@ dependencies = [
     "networkx>=3.4.2",
     "pydot>=3.0.2",
 ]
+
+[project.scripts]
+metafield = "metafield.app:main"
