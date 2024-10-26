@@ -4,4 +4,5 @@ from .nb_depends import (build_full_graph,
                          build_subgraph, 
                          search_node,
                          visualize, 
+                         verify_data,
                          data_deps)

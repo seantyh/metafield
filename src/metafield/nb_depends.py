@@ -1,5 +1,6 @@
 from pathlib import Path
 from itertools import chain
+from hashlib import sha1
 import tempfile
 import nbformat
 import networkx as nx
@@ -107,7 +108,45 @@ def visualize(G, hide_label=True):
   pydot_G.write_png(path)  # type: ignore
   return path
 
-def data_deps(G, target: str, depth=None):
+def data_deps(G, target: str, depth=None, to_text=False):
   sG = build_subgraph(G, target, depth)
-  vpath = visualize(sG, hide_label=False)
-  return vpath, sG
+  if to_text:
+    return "\n".join(nx.generate_network_text(sG))  # type: ignore
+  else:
+    vpath = visualize(sG, hide_label=False)
+    return vpath
+  
+def verify_data(G, target: str, depth=None, format_output=True):
+  sG = build_subgraph(G, target, depth)
+  repo_dir = Path(G.graph["repo_dir"])
+
+  outputs = []
+  for node_x in sG.nodes:
+    node_data = sG.nodes[node_x]    
+    if node_data["node_type"] == "data":
+      file_path = node_data["file_path"].replace("../", "")
+      data_path = repo_dir / file_path
+      if not data_path.exists():
+        outputs.append(("MISS", file_path, ""))
+      else:
+        # get sha1sum of data_path        
+        data_hash = sha1(data_path.read_bytes()).hexdigest()
+        node_hash = node_data["sha1"]
+        if data_hash != node_hash:
+          outputs.append(("DIFF", file_path, data_hash))
+        else:
+          outputs.append(("OK", file_path, data_hash))
+
+  if format_output: 
+    for status, file_path, data_hash in outputs:
+      if status == "OK":
+        color = "\033[1;36m"
+      elif status == "MISS":
+        color = "\033[1;33m"
+      elif status == "DIFF":
+        color = "\033[1;31m"
+      else:
+        color = ""            
+      print(f"[{color}{status:^4s}\033[0m] {data_hash[:7]:<7s} {file_path}")
+  else:
+    return outputs
